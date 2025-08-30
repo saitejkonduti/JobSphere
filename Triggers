@@ -1,0 +1,122 @@
+-- -----------------------------------------------------------------Trigger for updating the user status when the Account is not used for 3 months  ----------------------------------------------------------------------------
+
+
+DELIMITER //
+CREATE TRIGGER Update_UserStatus_Inactive
+BEFORE UPDATE ON Users
+FOR EACH ROW
+BEGIN
+    DECLARE three_months_ago DATE;
+    SET three_months_ago = DATE_SUB(NOW(), INTERVAL 3 MONTH);    
+    -- Check if AccUpdatedAT is before three months ago, set UserStatus accordingly
+    IF NEW.AccUpdatedAT <= three_months_ago THEN
+        SET NEW.UserStatus = 'Inactive';
+    ELSE
+        SET NEW.UserStatus = 'Active';
+    END IF;
+END //
+DELIMITER ;
+
+UPDATE Users 
+SET  AccUpdatedAT = '2023-12-09 19:00:00'
+WHERE UserID = 20;
+
+DELIMITER //
+CREATE TRIGGER user_status_Insert
+BEFORE INSERT ON Users
+FOR EACH ROW
+BEGIN
+	DECLARE three_months_ago DATE;
+    SET three_months_ago= DATE_SUB(NOW(), INTERVAL 3 MONTH);
+    
+    IF NEW.AccUpdatedAT <= three_months_ago THEN 
+		SET NEW.UserStatus = 'Inactive';
+	ELSE 
+		SET NEW.UserStatus = 'active';
+	END IF;
+END //
+DELIMITER ;
+
+SELECT * FROM Users;
+
+INSERT INTO Users (Email, UserPassword, FirstName, LastName, PhoneNumber, Location)
+VALUES
+('saitej.moore2@example.com', 'password123', 'Saitej', 'Moore', '432-200-8765', 'Boston' );
+
+-----------------------------------------------------------------------------------------Trigger to Notify Users when the new job posting of User Preferred choice is inserted in the database-------------------------------------------------
+
+DELIMITER //
+
+CREATE TRIGGER NotifyUsersOnJobInsert
+AFTER INSERT ON Jobs
+FOR EACH ROW
+BEGIN
+    -- Insert notifications for users whose preferred role matches the job title
+    INSERT INTO Notifications (UserID, JobID, Message, Notification_sent_at)
+    SELECT 
+        up.UserID,
+        NEW.JobID,
+        CONCAT('New job opening for ', NEW.Jobtitle, ' in ', NEW.Location, '. Apply now!'),
+        NOW()
+    FROM 
+        UserPreferences up
+    WHERE 
+        up.UserPreferredRole = NEW.Jobtitle;
+END //
+
+DELIMITER ;
+
+	
+INSERT INTO Jobs (Jobtitle, CompanyID, JobDescription, Location, SalaryRange, EmploymentType, Requirements, DatePosted, JobURL, JobStatus)
+VALUES
+('Data Analyst', 6, 'Analyze data to deliver insights.', 'San Francisco', '$70,000 - $90,000', 'Full Time', 'Proficiency in SQL and Tableau.', NOW(), 'http://example.com/jobs/data-analyst', 'Active');
+
+
+-- -------------------------------------------------------------------Trigger for sending alerts to user for missing skills--------------------------------------------------------------------------------------
+
+DELIMITER $$
+
+CREATE TRIGGER MissingJobSkillsAlert
+AFTER INSERT ON JobSkills
+FOR EACH ROW
+BEGIN
+    -- Insert alerts only for users who applied for the job and are missing the required skill
+    INSERT INTO UserAlerts (UserID, JobID, SkillID, Message, SkillSourceURL)
+    SELECT 
+        a.UserID,
+        NEW.JobID,
+        NEW.SkillID,
+        CONCAT(
+            'You are missing the skill "', 
+            s.SkillName, 
+            '" required for the job "', 
+            j.Jobtitle, 
+            '". Learn this skill here: ', 
+            s.Skillsource
+        ) AS Message,
+        s.Skillsource AS SkillSourceURL
+    FROM 
+        Applications a
+    JOIN 
+        Jobs j ON j.JobID = a.JobID
+    JOIN 
+        Skills s ON s.SkillID = NEW.SkillID
+    WHERE 
+        a.JobID = NEW.JobID
+        AND NOT EXISTS (
+            SELECT 1 
+            FROM UserSkills us 
+            WHERE us.UserID = a.UserID AND us.SkillID = NEW.SkillID
+        );
+END$$
+
+DELIMITER ;
+
+Insert Into Applications (UserID,JobId, Applicationstatus)
+Values (10,21, 'Pending');
+
+INSERT INTO JobSkills (JobID, SkillID, ImportanceLevel)
+VALUES (21, 7, 5); -- Assume JobID 21 requires the AWS skill (SkillID 7)
+
+Select * From UserAlerts;
+
