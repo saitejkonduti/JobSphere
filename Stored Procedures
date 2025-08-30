@@ -1,1 +1,109 @@
+-------------------------------------------------------------Stored Procedure For Recommending Jobs other the User Preferred Role--------------------------------------------------------------------------
+
+Use JobNotificationSystem;
+
+DELIMITER $$
+
+CREATE PROCEDURE GetJobUserMatches()
+BEGIN
+    SELECT	
+		UserDetails.UserPreferredRole,
+		UserDetails.FullName,
+		UserDetails.UserSkills,
+		C.CompanyName AS Recomended_Company,
+		J.JobTitle As Recommended_Role,
+		GROUP_CONCAT(DISTINCT S.SkillName)  AS JobSkills
+    FROM
+        Companies AS C
+    INNER JOIN
+        Jobs AS J ON C.CompanyID = J.CompanyID
+    INNER JOIN
+        JobSkills AS JS ON J.JobID = JS.JobID
+    INNER JOIN
+        Skills AS S ON JS.SkillID = S.SkillID
+    CROSS JOIN
+        (
+            SELECT
+                UP.UserPreferredRole,
+                U.UserID,
+                CONCAT(U.FirstName, " ", U.LastName) AS FullName,
+                GROUP_CONCAT(DISTINCT S.SkillName) AS UserSkills
+            FROM
+                UserPreferences AS UP
+            INNER JOIN
+                Users AS U ON UP.UserID = U.UserID
+            INNER JOIN
+                UserSkills AS US ON U.UserID = US.UserID
+            INNER JOIN
+                Skills AS S ON US.SkillID = S.SkillID
+            GROUP BY
+                UP.UserPreferredRole, U.UserID
+        ) AS UserDetails
+    WHERE 
+        UserDetails.UserPreferredRole <> J.JobTitle 
+        AND EXISTS (
+            SELECT 1
+            FROM JobSkills JS2
+            INNER JOIN UserSkills US2 ON JS2.SkillID = US2.SkillID
+            WHERE JS2.JobID = J.JobID
+              AND US2.UserID = UserDetails.UserID
+        )
+    GROUP BY
+        C.CompanyName, J.JobID, J.JobTitle, UserDetails.UserPreferredRole, UserDetails.UserID, UserDetails.FullName;
+END$$
+
+DELIMITER ;
+
+
+CAll GetJobUserMatches();
+
+-- -----------------------------------------------------------Stored Procedure For MOST dEMANDING Skills FOR Employers--------------------------------------------------------------------------
+
+DELIMITER //
+
+CREATE PROCEDURE MOSTDEMANDINGSkills()
+BEGIN
+    SELECT 
+        S.SkillName, 
+        COUNT(JS.SkillID) AS DemandCount
+    FROM 
+        Skills AS S
+    INNER JOIN 
+        JobSkills AS JS ON S.SkillID = JS.SkillID
+    GROUP BY 
+        S.SkillName
+    ORDER BY 
+        DemandCount DESC
+    LIMIT 5;
+END //
+
+DELIMITER ;
+
+Call MOSTDEMANDINGSkills;
+
+
+-- -----------------------------------------------------------Stored Procedure For Analyzing Job Trends OverTime--------------------------------------------------------------------------
+
+DELIMITER //
+
+CREATE PROCEDURE AnalyzeJobTrends()
+BEGIN
+    SELECT 
+        DATE(J.DatePosted) AS JobPostedDate, 
+        COUNT(J.JobID) AS No_of_JobOpenings
+    FROM 
+        Jobs AS J
+    GROUP BY 
+        JobPostedDate
+    ORDER BY 
+        JobPostedDate DESC;
+END //
+
+DELIMITER ;
+
+Drop Procedure AnalyzeJobTrends;
+
+Call AnalyzeJobTrends();
+
+
 
