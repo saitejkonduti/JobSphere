@@ -12,3 +12,6 @@ In the United States, **over 70% of job seekers** miss timely opportunities due 
 - Scalable integration with APIs from major job portals (**LinkedIn, Indeed, Glassdoor**).  
 
 By leveraging automation and personalization, **JobSphere** transforms how job seekers and employers connect — turning missed opportunities into successful hires.
+
+<img width="1536" height="1024" alt="ChatGPT Image Oct 16, 2025, 03_17_48 PM" src="https://github.com/user-attachments/assets/71572941-8155-44df-aa9b-7d93329ea968" />
+
