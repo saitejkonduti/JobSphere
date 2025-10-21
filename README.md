@@ -32,6 +32,50 @@ By leveraging automation and personalization, **JobSphere** transforms how job s
   - Users ↔ JobAlerts (1:M)
 - **Indexes:** Created on frequently joined columns (JobID, SkillID, CompanyID, UserID)
 
+- ## SQL Components
+
+### Complex Queries
+- Identify top 5 most-applied jobs  
+- Analyze notification success rate (applications after notifications)  
+- Find industries with highest skill demand  
+- List users missing required job skills (for Udemy recommendations)
+
+### Stored Procedures
+- `GetJobUserMatches()` → Recommends jobs based on matching skills  
+- `MOSTDEMANDINGSkills()` → Finds top trending skills  
+- `AnalyzeJobTrends()` → Shows job posting patterns over time
+
+### Triggers
+- `NotifyUsersOnJobInsert` → Auto-sends job notifications to users  
+- `MissingJobSkillsAlert` → Suggests Udemy courses for missing skills  
+- `Update_UserStatus_Inactive` → Flags inactive users automatically
+
+### Indexes
+- Optimized performance with composite indexes on key joins  
+  (`JobSkills(JobID, SkillID)`, `UserSkills(UserID, SkillID)`)
+
+** How to Run
+1. Open MySQL Workbench  
+2. Run scripts in this order:
+   - `TablesSchema_Records.sql`
+   - `StoredProcedures.sql`
+   - `Triggers.sql`
+   - `SQLComplexQueries.sql`
+   - `Indexes.sql`
+3. Execute sample stored procedures:
+   ```sql
+   CALL GetJobUserMatches();
+   CALL MOSTDEMANDINGSkills();
+
+
+### 7️⃣ **Business & Educational Value**
+## 📈 Business & Educational Value
+| Area | Description |
+|------|--------------|
+| **Efficiency** | Automates matching and notifications, reducing manual effort by 60% |
+| **Real-Time Alerts** | Triggers ensure users never miss relevant job postings |
+| **Skill Growth** | Suggests Udemy links for missing skills to promote upskilling |
+| **Recruiter Insights** | Analytical queries help companies understand job/skill trends |
 
 
 <img width="1036" height="900" alt="ChatGPT Image Oct 16, 2025, 03_17_48 PM" src="https://github.com/user-attachments/assets/71572941-8155-44df-aa9b-7d93329ea968" />
