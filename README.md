@@ -21,6 +21,18 @@ By leveraging automation and personalization, **JobSphere** transforms how job s
 - Triggers for real-time notifications and learning alerts
 - Role-based data integrity and access
 
+## Database Design
+- **Normalization:** Achieved 3NF to remove redundancy  
+- **Relationships:**
+  - Users ↔ Applications (1:M)
+  - Jobs ↔ Skills (M:N)
+  - Users ↔ Skills (M:N)
+  - Users ↔ Notifications (1:M)
+  - Companies ↔ Jobs (1:M)
+  - Users ↔ JobAlerts (1:M)
+- **Indexes:** Created on frequently joined columns (JobID, SkillID, CompanyID, UserID)
+
+
 
 <img width="1036" height="900" alt="ChatGPT Image Oct 16, 2025, 03_17_48 PM" src="https://github.com/user-attachments/assets/71572941-8155-44df-aa9b-7d93329ea968" />
 
