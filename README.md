@@ -68,8 +68,8 @@ By leveraging automation and personalization, **JobSphere** transforms how job s
    CALL MOSTDEMANDINGSkills();
 
 
-### 7️⃣ **Business & Educational Value**
-## 📈 Business & Educational Value
+### 7️ **Business & Educational Value**
+## Business & Educational Value
 | Area | Description |
 |------|--------------|
 | **Efficiency** | Automates matching and notifications, reducing manual effort by 60% |
